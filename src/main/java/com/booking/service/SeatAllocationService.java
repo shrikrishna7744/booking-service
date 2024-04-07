@@ -2,13 +2,12 @@ package com.booking.service;
 
 import com.booking.entity.SeatDetail;
 
-
 public interface SeatAllocationService {
-    SeatDetail allocateSeat();
 
-    void removeBooing(String seatAllocated);
+    SeatDetail allocateRandomSeat();
 
-    SeatDetail getSeat(String seatId);
+    SeatDetail allocateSeat(String seatId);
 
-    SeatDetail assignSeat(String seatNumber);
+    void deallocateSeat(String seatAllocated);
+
 }

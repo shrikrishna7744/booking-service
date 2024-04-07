@@ -1,12 +1,13 @@
 package com.booking.mapper;
 
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import com.booking.entity.Booking;
 import com.booking.model.BookingModel;
 import com.booking.model.Currency;
 import com.booking.model.User;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class BookingMapperImpl implements BookingMapper {
@@ -33,21 +34,25 @@ public class BookingMapperImpl implements BookingMapper {
         model.setFrom(booking.getFromLocation());
         model.setSectionAllocated(booking.getSectionAllocated());
         model.setSeatAllocated(booking.getSeatAllocated());
+        model.setId(booking.getId());
+        model.setUser(createUser(booking));
+        return model;
+    }
+
+    private User createUser(Booking booking) {
         User user = new User();
         user.setFirstName(booking.getFirstName());
         user.setLastName(booking.getLastName());
         user.setEmail(booking.getEmail());
-        model.setUser(user);
-        model.setId(booking.getId());
-
-        return model;
+        return user;
     }
 
     public List<Booking> mapToEntity(List<BookingModel> bookingModel) {
-        return bookingModel.stream().map(x -> mapToEntity(x)).toList();
+        return bookingModel.stream().map(bm -> mapToEntity(bm)).toList();
     }
 
     public List<BookingModel> mapToModel(List<Booking> booking) {
-        return booking.stream().map(x -> mapToModel(x)).toList();
+        return booking.stream().map(bm -> mapToModel(bm)).toList();
     }
+
 }

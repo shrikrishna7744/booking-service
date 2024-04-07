@@ -1,43 +1,56 @@
 package com.booking.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.booking.model.BookingFilter;
 import com.booking.model.BookingModel;
 import com.booking.model.UpdateBookingModel;
 import com.booking.service.BookingService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/booking")
 public class BookingController {
 
-    @Autowired
-    BookingService bookingService;
+    private final BookingService bookingService;
+
+    public BookingController(final BookingService bookingService) {
+        super();
+        this.bookingService = bookingService;
+    }
 
     @PostMapping
     public ResponseEntity<BookingModel> createBooking(@RequestBody @Valid BookingModel bookingDetails) {
-        return new ResponseEntity<>(bookingService.createBooking(bookingDetails), HttpStatus.OK);
+        return ResponseEntity.ok(bookingService.createBooking(bookingDetails));
 
     }
 
     @GetMapping
     public ResponseEntity<List<BookingModel>> getAll(BookingFilter filter) {
-        return new ResponseEntity<>(bookingService.getAll(filter), HttpStatus.OK);
+        return ResponseEntity.ok(bookingService.getAllBookings(filter));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BookingModel> updateSeat(@PathVariable("id") Long bookingId, @RequestBody @Valid UpdateBookingModel updateBookingModel) {
-        return new ResponseEntity<>(bookingService.updateSeat(bookingId, updateBookingModel), HttpStatus.OK);
+    public ResponseEntity<BookingModel> updateSeat(@PathVariable("id") Long bookingId,
+                                                   @RequestBody @Valid UpdateBookingModel updateBookingModel) {
+        return ResponseEntity.ok(bookingService.updateSeat(bookingId, updateBookingModel));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteBooking(@PathVariable("id") Long bookingId) {
+    public ResponseEntity<Void> deleteBooking(@PathVariable("id") Long bookingId) {
         bookingService.deleteBooking(bookingId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
+
 }

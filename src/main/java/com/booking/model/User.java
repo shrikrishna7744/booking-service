@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class User {
+
     @NotEmpty(message = "First name can not be null or empty")
     private String firstName;
     private String lastName;

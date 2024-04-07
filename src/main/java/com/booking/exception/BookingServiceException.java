@@ -1,10 +1,11 @@
 package com.booking.exception;
 
-public class NoSeatAvailableException extends RuntimeException {
+public class BookingServiceException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    public NoSeatAvailableException(String message) {
+    public BookingServiceException(String message) {
         super(message);
     }
+
 }

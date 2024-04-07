@@ -1,11 +1,12 @@
 package com.booking.mapper;
 
+import java.util.List;
+
 import com.booking.entity.Booking;
 import com.booking.model.BookingModel;
 
-import java.util.List;
-
 public interface BookingMapper {
+
     Booking mapToEntity(BookingModel bookingModel);
 
     BookingModel mapToModel(Booking booking);

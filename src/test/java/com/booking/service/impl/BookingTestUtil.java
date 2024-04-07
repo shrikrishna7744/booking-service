@@ -1,14 +1,15 @@
 package com.booking.service.impl;
 
+import java.math.BigDecimal;
+
 import com.booking.entity.Booking;
 import com.booking.entity.SeatDetail;
 import com.booking.model.BookingModel;
 import com.booking.model.Currency;
 import com.booking.model.User;
 
-import java.math.BigDecimal;
-
 public class BookingTestUtil {
+
     public static BookingModel buildBookingModel() {
         User user = new User();
         user.setEmail("krishna@gmail.com");
@@ -49,4 +50,5 @@ public class BookingTestUtil {
         seatDetail.setSectionId("1");
         return seatDetail;
     }
+
 }
