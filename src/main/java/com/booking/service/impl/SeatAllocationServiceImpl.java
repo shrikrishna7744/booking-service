@@ -23,7 +23,6 @@ public class SeatAllocationServiceImpl implements SeatAllocationService {
     private final Random random;
 
     public SeatAllocationServiceImpl(final SeatDetailRepository seatDetailRepository) {
-        super();
         this.seatDetailRepository = seatDetailRepository;
         this.random = new Random();
     }
@@ -69,5 +68,4 @@ public class SeatAllocationServiceImpl implements SeatAllocationService {
             seatDetailRepository.save(seatDetail);
         });
     }
-
 }

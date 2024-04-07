@@ -1,11 +1,15 @@
 package com.booking.service.impl;
 
 import static com.booking.service.impl.BookingTestUtil.buildSeatDetails;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import com.booking.entity.SeatDetail;
+import com.booking.exception.EntityNotFound;
+import com.booking.repository.SeatDetailRepository;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -15,19 +19,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import com.booking.entity.SeatDetail;
-import com.booking.exception.NoSeatAvailableException;
-import com.booking.repository.SeatDetailRepository;
 
 @ContextConfiguration(classes = {SeatAllocationServiceImpl.class})
 @ExtendWith(SpringExtension.class)
 @DisabledInAotMode
 class SeatAllocationServiceImplTest {
-
     @Autowired
     private SeatAllocationServiceImpl seatAllocationServiceImpl;
 
@@ -35,13 +36,29 @@ class SeatAllocationServiceImplTest {
     private SeatDetailRepository seatDetailRepository;
 
     @Test
-    void testAllocateSeat() {
+    void testAllocateRandomSeat() {
         // Arrange
-        when(seatDetailRepository.findAll()).thenReturn(new ArrayList<>());
+        when(seatDetailRepository.findRandomAvailableSeat(Mockito.<Pageable>any()))
+                .thenReturn(new PageImpl<>(new ArrayList<>()));
+        when(seatDetailRepository.countAvailableSeats()).thenReturn(3L);
 
         // Act and Assert
-        assertThrows(NoSeatAvailableException.class, () -> seatAllocationServiceImpl.allocateRandomSeat());
-        verify(seatDetailRepository).findAll();
+        assertThrows(EntityNotFound.class, () -> seatAllocationServiceImpl.allocateRandomSeat());
+        verify(seatDetailRepository).countAvailableSeats();
+        verify(seatDetailRepository).findRandomAvailableSeat(isA(Pageable.class));
+    }
+
+    @Test
+    void testAllocateRandomSeat2() {
+        // Arrange
+        when(seatDetailRepository.findRandomAvailableSeat(Mockito.<Pageable>any()))
+                .thenThrow(new EntityNotFound("Seat details not found"));
+        when(seatDetailRepository.countAvailableSeats()).thenReturn(3L);
+
+        // Act and Assert
+        assertThrows(EntityNotFound.class, () -> seatAllocationServiceImpl.allocateRandomSeat());
+        verify(seatDetailRepository).countAvailableSeats();
+        verify(seatDetailRepository).findRandomAvailableSeat(isA(Pageable.class));
     }
 
     @Test
@@ -49,42 +66,19 @@ class SeatAllocationServiceImplTest {
         // Arrange
         SeatDetail seatDetail = buildSeatDetails();
 
-        ArrayList<SeatDetail> seatDetailList = new ArrayList<>();
-        seatDetailList.add(seatDetail);
+        Optional<SeatDetail> ofResult = Optional.of(seatDetail);
         when(seatDetailRepository.save(Mockito.<SeatDetail>any()))
-                .thenThrow(new NoSeatAvailableException("An error occurred"));
-        when(seatDetailRepository.findAll()).thenReturn(seatDetailList);
+                .thenThrow(new EntityNotFound("Seat details not found"));
+        when(seatDetailRepository.findByIdIfAvailable(Mockito.<String>any())).thenReturn(ofResult);
 
         // Act and Assert
-        assertThrows(NoSeatAvailableException.class, () -> seatAllocationServiceImpl.allocateRandomSeat());
+        assertThrows(EntityNotFound.class, () -> seatAllocationServiceImpl.allocateSeat("1"));
+        verify(seatDetailRepository).findByIdIfAvailable(eq("1"));
         verify(seatDetailRepository).save(isA(SeatDetail.class));
-        verify(seatDetailRepository).findAll();
     }
 
     @Test
-    void testRemoveBooing() {
-        // Arrange
-        when(seatDetailRepository.findAll()).thenReturn(new ArrayList<>());
-
-        // Act
-        seatAllocationServiceImpl.deallocateSeat("Seat Allocated");
-
-        // Assert that nothing has changed
-        verify(seatDetailRepository).findAll();
-    }
-
-    @Test
-    void testRemoveBooing3() {
-        // Arrange
-        when(seatDetailRepository.findAll()).thenThrow(new NoSeatAvailableException("An error occurred"));
-
-        // Act and Assert
-        assertThrows(NoSeatAvailableException.class, () -> seatAllocationServiceImpl.deallocateSeat("Seat Allocated"));
-        verify(seatDetailRepository).findAll();
-    }
-
-    @Test
-    void testAssignSeat() {
+    void testDeallocateSeat() {
         // Arrange
         SeatDetail seatDetail = buildSeatDetails();
         Optional<SeatDetail> ofResult = Optional.of(seatDetail);
@@ -94,27 +88,25 @@ class SeatAllocationServiceImplTest {
         when(seatDetailRepository.findById(Mockito.<String>any())).thenReturn(ofResult);
 
         // Act
-        SeatDetail actualAssignSeatResult = seatAllocationServiceImpl.allocateSeat("1");
+        seatAllocationServiceImpl.deallocateSeat("1");
 
         // Assert
-        verify(seatDetailRepository).findById("1");
+        verify(seatDetailRepository).findById(eq("1"));
         verify(seatDetailRepository).save(isA(SeatDetail.class));
-        assertFalse(actualAssignSeatResult.isAvailable());
     }
 
     @Test
-    void testAssignSeat2() {
+    void testDeallocateSeat2() {
         // Arrange
         SeatDetail seatDetail = buildSeatDetails();
         Optional<SeatDetail> ofResult = Optional.of(seatDetail);
         when(seatDetailRepository.save(Mockito.<SeatDetail>any()))
-                .thenThrow(new NoSeatAvailableException("No seat available"));
+                .thenThrow(new EntityNotFound("Seat details not found"));
         when(seatDetailRepository.findById(Mockito.<String>any())).thenReturn(ofResult);
 
         // Act and Assert
-        assertThrows(NoSeatAvailableException.class, () -> seatAllocationServiceImpl.allocateSeat("1"));
-        verify(seatDetailRepository).findById("1");
+        assertThrows(EntityNotFound.class, () -> seatAllocationServiceImpl.deallocateSeat("1"));
+        verify(seatDetailRepository).findById(eq("1"));
         verify(seatDetailRepository).save(isA(SeatDetail.class));
     }
-
 }

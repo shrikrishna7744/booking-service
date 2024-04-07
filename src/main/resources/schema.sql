@@ -1,1 +1,0 @@
-CREATE TABLE seat_details12 (seat_id VARCHAR(255) PRIMARY KEY,section_id VARCHAR(255),is_available BOOLEAN);

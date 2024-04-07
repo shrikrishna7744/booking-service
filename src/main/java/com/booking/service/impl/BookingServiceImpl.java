@@ -31,7 +31,6 @@ public class BookingServiceImpl implements BookingService {
 
     public BookingServiceImpl(final BookingRepository bookingRepository,
                               final SeatAllocationService seatAllocationService, final BookingMapper bookingMapper) {
-        super();
         this.bookingRepository = bookingRepository;
         this.seatAllocationService = seatAllocationService;
         this.bookingMapper = bookingMapper;

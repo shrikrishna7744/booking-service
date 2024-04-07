@@ -26,7 +26,6 @@ public class BookingController {
     private final BookingService bookingService;
 
     public BookingController(final BookingService bookingService) {
-        super();
         this.bookingService = bookingService;
     }
 
